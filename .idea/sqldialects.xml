@@ -3,5 +3,6 @@
   <component name="SqlDialectMappings">
     <file url="file://$PROJECT_DIR$/pkg/social-media/migrations/20240225051842_initialize_tables.down.sql" dialect="PostgreSQL" />
     <file url="file://$PROJECT_DIR$/pkg/social-media/migrations/20240225051842_initialize_tables.up.sql" dialect="PostgreSQL" />
+    <file url="file://$PROJECT_DIR$/pkg/social-media/model/user.go" dialect="GenericSQL" />
   </component>
 </project>
