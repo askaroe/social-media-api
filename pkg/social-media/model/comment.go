@@ -9,7 +9,7 @@ type Comment struct {
 	Id        string `json:"id"`
 	CreatedAt string `json:"createdAt"`
 	UpdatedAt string `json:"updatedAt"`
-	Text      string `json:"text"`
+	Message   string `json:"text"`
 	UserId    string `json:"userId"`
 	PostId    string `json:"PostId"`
 }
