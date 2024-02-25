@@ -55,14 +55,9 @@ func (app *application) run() {
 
 	v1 := r.PathPrefix("/api/v1").Subrouter()
 
-	// Menu Singleton
-	// Create a new menu
 	v1.HandleFunc("/users", app.createUserHandler).Methods("POST")
-	// Get a specific menu
 	v1.HandleFunc("/users/{userId:[0-9]+}", app.getUserHandler).Methods("GET")
-	// Update a specific menu
 	v1.HandleFunc("/users/{userId:[0-9]+}", app.updateUserHandler).Methods("PUT")
-	// Delete a specific menu
 	v1.HandleFunc("/users/{userId:[0-9]+}", app.deleteUserHandler).Methods("DELETE")
 
 	log.Printf("Starting server on %s\n", app.config.port)
@@ -71,7 +66,6 @@ func (app *application) run() {
 }
 
 func openDB(cfg config) (*sql.DB, error) {
-	// Use sql.Open() to create an empty connection pool, using the DSN from the config // struct.
 	db, err := sql.Open("postgres", cfg.db.dsn)
 	if err != nil {
 		return nil, err
