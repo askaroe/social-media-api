@@ -55,10 +55,17 @@ func (app *application) run() {
 
 	v1 := r.PathPrefix("/api/v1").Subrouter()
 
+	// Users
 	v1.HandleFunc("/users", app.createUserHandler).Methods("POST")
 	v1.HandleFunc("/users/{userId:[0-9]+}", app.getUserHandler).Methods("GET")
 	v1.HandleFunc("/users/{userId:[0-9]+}", app.updateUserHandler).Methods("PUT")
 	v1.HandleFunc("/users/{userId:[0-9]+}", app.deleteUserHandler).Methods("DELETE")
+
+	// Posts
+	v1.HandleFunc("/posts", app.createPostHandler).Methods("POST")
+	v1.HandleFunc("/posts/{postId:[0-9]+}", app.getPostHandler).Methods("GET")
+	v1.HandleFunc("/posts/{postId:[0-9]+}", app.updatePostHandler).Methods("PUT")
+	v1.HandleFunc("/posts/{postId:[0-9]+}", app.deletePostHandler).Methods("DELETE")
 
 	log.Printf("Starting server on %s\n", app.config.port)
 	err := http.ListenAndServe(app.config.port, r)
