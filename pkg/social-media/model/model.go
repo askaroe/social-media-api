@@ -7,8 +7,9 @@ import (
 )
 
 type Models struct {
-	Users UserModel
-	Posts PostModel
+	Users    UserModel
+	Posts    PostModel
+	Comments CommentModel
 }
 
 func NewModels(db *sql.DB) Models {
@@ -21,6 +22,11 @@ func NewModels(db *sql.DB) Models {
 			ErrorLog: errorLog,
 		},
 		Posts: PostModel{
+			DB:       db,
+			InfoLog:  infoLog,
+			ErrorLog: errorLog,
+		},
+		Comments: CommentModel{
 			DB:       db,
 			InfoLog:  infoLog,
 			ErrorLog: errorLog,

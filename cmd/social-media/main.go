@@ -67,6 +67,12 @@ func (app *application) run() {
 	v1.HandleFunc("/posts/{postId:[0-9]+}", app.updatePostHandler).Methods("PUT")
 	v1.HandleFunc("/posts/{postId:[0-9]+}", app.deletePostHandler).Methods("DELETE")
 
+	// Comments
+	v1.HandleFunc("/comments", app.createCommentHandler).Methods("POST")
+	v1.HandleFunc("/comments/{commentId:[0-9]+}", app.getCommentHandler).Methods("GET")
+	v1.HandleFunc("/comments/{commentId:[0-9]+}", app.updateCommentHandler).Methods("PUT")
+	v1.HandleFunc("/comments/{commentId:[0-9]+}", app.deleteCommentHandler).Methods("DELETE")
+
 	log.Printf("Starting server on %s\n", app.config.port)
 	err := http.ListenAndServe(app.config.port, r)
 	log.Fatal(err)

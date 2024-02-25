@@ -5,6 +5,7 @@
     <file url="file://$PROJECT_DIR$/pkg/social-media/migrations/20240225051842_initialize_tables.up.sql" dialect="PostgreSQL" />
     <file url="file://$PROJECT_DIR$/pkg/social-media/migrations/20240225175350_create_posts_and_comments_tables.down.sql" dialect="PostgreSQL" />
     <file url="file://$PROJECT_DIR$/pkg/social-media/migrations/20240225175350_create_posts_and_comments_tables.up.sql" dialect="PostgreSQL" />
+    <file url="file://$PROJECT_DIR$/pkg/social-media/model/comment.go" dialect="GenericSQL" />
     <file url="file://$PROJECT_DIR$/pkg/social-media/model/post.go" dialect="GenericSQL" />
     <file url="file://$PROJECT_DIR$/pkg/social-media/model/user.go" dialect="GenericSQL" />
   </component>
