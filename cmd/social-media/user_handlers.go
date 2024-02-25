@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"github.com/askaroe/social-media-api/pkg/social-media/model"
 	"github.com/gorilla/mux"
+	"golang.org/x/crypto/bcrypt"
 	"net/http"
 	"strconv"
 )
@@ -39,6 +40,7 @@ func (app *application) createUserHandler(w http.ResponseWriter, r *http.Request
 	if err != nil {
 		app.respondWithError(w, http.StatusBadRequest, "Invalid request payload")
 	}
+	hashed, _ := bcrypt.GenerateFromPassword([]byte(input.Password), 8)
 
 	user := &model.User{
 		ProfilePhoto: input.ProfilePhoto,
@@ -46,7 +48,7 @@ func (app *application) createUserHandler(w http.ResponseWriter, r *http.Request
 		Username:     input.Username,
 		Description:  input.Description,
 		Email:        input.Email,
-		Password:     input.Password,
+		Password:     string(hashed),
 	}
 
 	err = app.models.Users.Insert(user)
@@ -58,7 +60,16 @@ func (app *application) createUserHandler(w http.ResponseWriter, r *http.Request
 	app.respondWithJson(w, http.StatusCreated, user)
 }
 
-func (app *application) getUserHandler(w http.ResponseWriter, r *http.Request) {
+func (app *application) getAllUsersHandler(w http.ResponseWriter, r *http.Request) {
+	users, err := app.models.Users.GetAll()
+	if err != nil {
+		app.respondWithError(w, http.StatusInternalServerError, "Failed to fetch users")
+		return
+	}
+	app.respondWithJson(w, http.StatusOK, users)
+}
+
+func (app *application) getUserByIdHandler(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	param := vars["userId"]
 
@@ -69,7 +80,7 @@ func (app *application) getUserHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user, err := app.models.Users.Get(id)
+	user, err := app.models.Users.GetById(id)
 
 	if err != nil {
 		app.respondWithError(w, http.StatusNotFound, "404 Not Found")
@@ -88,7 +99,7 @@ func (app *application) updateUserHandler(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	user, err := app.models.Users.Get(id)
+	user, err := app.models.Users.GetById(id)
 	if err != nil {
 		app.respondWithError(w, http.StatusNotFound, "404 Not Found")
 		return

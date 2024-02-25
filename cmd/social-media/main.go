@@ -56,8 +56,9 @@ func (app *application) run() {
 	v1 := r.PathPrefix("/api/v1").Subrouter()
 
 	// Users
-	v1.HandleFunc("/users", app.createUserHandler).Methods("POST")
-	v1.HandleFunc("/users/{userId:[0-9]+}", app.getUserHandler).Methods("GET")
+	v1.HandleFunc("/register", app.createUserHandler).Methods("POST")
+	v1.HandleFunc("/users", app.getAllUsersHandler).Methods("GET")
+	v1.HandleFunc("/users/{userId:[0-9]+}", app.getUserByIdHandler).Methods("GET")
 	v1.HandleFunc("/users/{userId:[0-9]+}", app.updateUserHandler).Methods("PUT")
 	v1.HandleFunc("/users/{userId:[0-9]+}", app.deleteUserHandler).Methods("DELETE")
 
