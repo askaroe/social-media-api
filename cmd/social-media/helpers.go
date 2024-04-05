@@ -8,6 +8,8 @@ import (
 	"github.com/askaroe/social-media-api/pkg/social-media/validator"
 )
 
+type envelope map[string]interface{}
+
 // The readString() helper returns a string value from the query string, or the provided
 // default value if no matching key could be found.
 func (app *application) readString(qs url.Values, key string, defaultValue string) string {

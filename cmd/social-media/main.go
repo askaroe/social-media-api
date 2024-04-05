@@ -4,10 +4,12 @@ import (
 	"database/sql"
 	"flag"
 	"fmt"
-	"github.com/askaroe/social-media-api/pkg/social-media/model"
-	"github.com/gorilla/mux"
 	"log"
 	"net/http"
+
+	"github.com/askaroe/social-media-api/pkg/jsonlog"
+	"github.com/askaroe/social-media-api/pkg/social-media/model"
+	"github.com/gorilla/mux"
 
 	_ "github.com/lib/pq"
 )
@@ -23,6 +25,7 @@ type config struct {
 type application struct {
 	config config
 	models model.Models
+	logger *jsonlog.Logger
 }
 
 func main() {
