@@ -62,11 +62,15 @@ func (app *application) getAllUsersHandler(w http.ResponseWriter, r *http.Reques
 
 	input.Filters.Sort = app.readString(qs, "sort", "id")
 
-	if !v.Valid() {
+	input.Filters.SortSafelist = []string{
+		"id", "name", "username",
+		"-id", "-name", "-username",
+	}
+
+	if model.ValidateFilters(v, input.Filters); !v.Valid() {
 		app.failedValidationResponse(w, r, v.Errors)
 		return
 	}
-	// Dump the contents of the input struct in a HTTP response.
 	fmt.Fprintf(w, "%+v\n", input)
 
 }
