@@ -47,29 +47,21 @@ func (app *application) createUserHandler(w http.ResponseWriter, r *http.Request
 
 func (app *application) getAllUsersHandler(w http.ResponseWriter, r *http.Request) {
 	var input struct {
-		Name     string
-		Page     int
-		PageSize int
-		Sort     string
+		Name string
+		model.Filters
 	}
 
 	v := validator.New()
 
 	qs := r.URL.Query()
-	// Use our helpers to extract the title and genres query string values, falling back
-	// to defaults of an empty string and an empty slice respectively if they are not
-	// provided by the client.
+
 	input.Name = app.readString(qs, "name", "")
-	// Get the page and page_size query string values as integers. Notice that we set
-	// the default page value to 1 and default page_size to 20, and that we pass the
-	// validator instance as the final argument here.
-	input.Page = app.readInt(qs, "page", 1, v)
-	input.PageSize = app.readInt(qs, "page_size", 20, v)
-	// Extract the sort query string value, falling back to "id" if it is not provided
-	// by the client (which will imply a ascending sort on movie ID).
-	input.Sort = app.readString(qs, "sort", "id")
-	// Check the Validator instance for any errors and use the failedValidationResponse()
-	// helper to send the client a response if necessary.
+
+	input.Filters.Page = app.readInt(qs, "page", 1, v)
+	input.Filters.PageSize = app.readInt(qs, "page_size", 20, v)
+
+	input.Filters.Sort = app.readString(qs, "sort", "id")
+
 	if !v.Valid() {
 		app.failedValidationResponse(w, r, v.Errors)
 		return
