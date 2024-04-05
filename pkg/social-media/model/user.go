@@ -50,12 +50,15 @@ func (u UserModel) GetAll(username string, age string, filters Filters) ([]*User
 		WHERE (LOWER(username) = LOWER($1) OR $1 = '')
 		AND (age >= $2 OR $2 = 0)
 		ORDER BY %s %s, id ASC
+		LIMIT $3 OFFSET $4
 	`, filters.sortColumn(), filters.sortDirection())
 
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
-	rows, err := u.DB.QueryContext(ctx, query, username, age)
+	args := []interface{}{username, age, filters.limit(), filters.offset()}
+
+	rows, err := u.DB.QueryContext(ctx, query, args...)
 	if err != nil {
 		return nil, err
 	}
