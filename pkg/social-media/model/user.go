@@ -65,6 +65,7 @@ func (u UserModel) GetAll(name string, filters Filters) ([]*User, error) {
 			&user.CreatedAt,
 			&user.UpdatedAt,
 			&user.Name,
+			&user.ProfilePhoto,
 			&user.Username,
 			&user.Description,
 			&user.Email,
@@ -82,7 +83,7 @@ func (u UserModel) GetAll(name string, filters Filters) ([]*User, error) {
 		return nil, err
 	}
 
-	return nil, err
+	return users, err
 }
 
 func (u UserModel) GetById(id int) (*User, error) {
