@@ -5,7 +5,6 @@ import (
 	"strconv"
 
 	"github.com/askaroe/social-media-api/pkg/social-media/model"
-	"github.com/askaroe/social-media-api/pkg/social-media/validator"
 	"github.com/gorilla/mux"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -45,29 +44,12 @@ func (app *application) createUserHandler(w http.ResponseWriter, r *http.Request
 }
 
 func (app *application) getAllUsersHandler(w http.ResponseWriter, r *http.Request) {
-	var input struct {
-		Name     string
-		Username string
-		Page     int
-		PageSize int
-		Sort     string
+	users, err := app.models.Users.GetAll()
+	if err != nil {
+		app.respondWithError(w, http.StatusInternalServerError, "Failed to fetch users")
+		return
 	}
-
-	v := validator.New()
-
-	qs := r.URL.Query()
-
-	input.Name = app.readString(qs, "name", "")
-	input.Username = app.readString(qs, "username", "")
-
-	input.Page = app.readInt(qs, "page", 1, v)
-	input.PageSize = app.readInt(qs, "page_size", 20, v)
-
-	input.Sort = app.readString(qs, "sort", "id")
-
-	if !v.Valid() {
-		app.failed
-	}
+	app.respondWithJson(w, http.StatusOK, users)
 }
 
 func (app *application) getUserByIdHandler(w http.ResponseWriter, r *http.Request) {
