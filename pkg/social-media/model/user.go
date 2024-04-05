@@ -39,17 +39,19 @@ func (u UserModel) Insert(user *User) error {
 	return u.DB.QueryRowContext(ctx, query, args...).Scan(&user.Id, &user.CreatedAt, &user.UpdatedAt)
 }
 
-func (u UserModel) GetAll(name string, filters Filters) ([]*User, error) {
+func (u UserModel) GetAll(username string, age string, filters Filters) ([]*User, error) {
 	query := `
 		SELECT id, createdAt, updatedAt, profilePhoto, name, username, description, email, password, age
 		FROM users
+		WHERE (LOWER(username) = LOWER($1) OR $1 = '')
+		AND (age >= $2 OR $2 = 0)
 		ORDER BY id
 	`
 
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
-	rows, err := u.DB.QueryContext(ctx, query)
+	rows, err := u.DB.QueryContext(ctx, query, username, age)
 	if err != nil {
 		return nil, err
 	}
@@ -65,8 +67,8 @@ func (u UserModel) GetAll(name string, filters Filters) ([]*User, error) {
 			&user.Id,
 			&user.CreatedAt,
 			&user.UpdatedAt,
-			&user.Name,
 			&user.ProfilePhoto,
+			&user.Name,
 			&user.Username,
 			&user.Description,
 			&user.Email,
@@ -81,11 +83,11 @@ func (u UserModel) GetAll(name string, filters Filters) ([]*User, error) {
 		users = append(users, &user)
 	}
 
-	if err = rows.Err(); err != nil {
+	if err := rows.Err(); err != nil {
 		return nil, err
 	}
 
-	return users, err
+	return users, nil // Return users and nil error
 }
 
 func (u UserModel) GetById(id int) (*User, error) {

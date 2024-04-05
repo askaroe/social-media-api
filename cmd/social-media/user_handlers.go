@@ -48,7 +48,8 @@ func (app *application) createUserHandler(w http.ResponseWriter, r *http.Request
 
 func (app *application) getAllUsersHandler(w http.ResponseWriter, r *http.Request) {
 	var input struct {
-		Name string
+		Username string
+		Age      string
 		model.Filters
 	}
 
@@ -56,7 +57,8 @@ func (app *application) getAllUsersHandler(w http.ResponseWriter, r *http.Reques
 
 	qs := r.URL.Query()
 
-	input.Name = app.readString(qs, "name", "")
+	input.Username = app.readString(qs, "username", "")
+	input.Age = app.readString(qs, "age", "")
 
 	input.Filters.Page = app.readInt(qs, "page", 1, v)
 	input.Filters.PageSize = app.readInt(qs, "page_size", 20, v)
@@ -64,16 +66,15 @@ func (app *application) getAllUsersHandler(w http.ResponseWriter, r *http.Reques
 	input.Filters.Sort = app.readString(qs, "sort", "id")
 
 	input.Filters.SortSafelist = []string{
-		"id", "name", "username",
-		"-id", "-name", "-username",
+		"id", "name", "username", "age",
+		"-id", "-name", "-username", "-age",
 	}
 
 	if model.ValidateFilters(v, input.Filters); !v.Valid() {
 		app.failedValidationResponse(w, r, v.Errors)
 		return
 	}
-
-	users, err := app.models.Users.GetAll(input.Name, input.Filters)
+	users, err := app.models.Users.GetAll(input.Username, input.Age, input.Filters)
 
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
