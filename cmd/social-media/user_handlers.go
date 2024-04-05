@@ -18,6 +18,7 @@ func (app *application) createUserHandler(w http.ResponseWriter, r *http.Request
 		Description  string `json:"description"`
 		Email        string `json:"email"`
 		Password     string `json:"password"`
+		Age          string `json:"age"`
 	}
 
 	err := app.readJSON(w, r, &input)
@@ -33,6 +34,7 @@ func (app *application) createUserHandler(w http.ResponseWriter, r *http.Request
 		Description:  input.Description,
 		Email:        input.Email,
 		Password:     string(hashed),
+		Age:          input.Age,
 	}
 
 	err = app.models.Users.Insert(user)
@@ -127,6 +129,7 @@ func (app *application) updateUserHandler(w http.ResponseWriter, r *http.Request
 		Description  *string `json:"description"`
 		Email        *string `json:"email"`
 		Password     *string `json:"password"`
+		Age          *string `json:"age"`
 	}
 
 	err = app.readJSON(w, r, &input)
@@ -153,6 +156,9 @@ func (app *application) updateUserHandler(w http.ResponseWriter, r *http.Request
 	}
 	if input.Password != nil {
 		user.Password = *input.Password
+	}
+	if input.Age != nil {
+		user.Age = *input.Age
 	}
 
 	err = app.models.Users.Update(user)

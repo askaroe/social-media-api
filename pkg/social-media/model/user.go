@@ -17,6 +17,7 @@ type User struct {
 	Description  string `json:"description"`
 	Email        string `json:"email"`
 	Password     string `json:"password"`
+	Age          string `json:"age"`
 }
 type UserModel struct {
 	DB       *sql.DB
@@ -26,11 +27,11 @@ type UserModel struct {
 
 func (u UserModel) Insert(user *User) error {
 	query := `
-			INSERT INTO users (profilePhoto, name, username, description, email, password)
-			VALUES($1, $2, $3, $4, $5, $6)
+			INSERT INTO users (profilePhoto, name, username, description, email, password, age)
+			VALUES($1, $2, $3, $4, $5, $6, $7)
 			RETURNING id, createdAt, updatedAt
 			`
-	args := []interface{}{user.ProfilePhoto, user.Name, user.Username, user.Description, user.Email, user.Password}
+	args := []interface{}{user.ProfilePhoto, user.Name, user.Username, user.Description, user.Email, user.Password, user.Age}
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 
 	defer cancel()
@@ -40,7 +41,7 @@ func (u UserModel) Insert(user *User) error {
 
 func (u UserModel) GetAll(name string, filters Filters) ([]*User, error) {
 	query := `
-		SELECT id, createdAt, updatedAt, profilePhoto, name, username, description, email, password
+		SELECT id, createdAt, updatedAt, profilePhoto, name, username, description, email, password, age
 		FROM users
 		ORDER BY id
 	`
@@ -70,6 +71,7 @@ func (u UserModel) GetAll(name string, filters Filters) ([]*User, error) {
 			&user.Description,
 			&user.Email,
 			&user.Password,
+			&user.Age,
 		)
 
 		if err != nil {
@@ -88,7 +90,7 @@ func (u UserModel) GetAll(name string, filters Filters) ([]*User, error) {
 
 func (u UserModel) GetById(id int) (*User, error) {
 	query := `
-		SELECT id, createdAt, updatedAt, profilePhoto, name, username, description, email, password
+		SELECT id, createdAt, updatedAt, profilePhoto, name, username, description, email, password, age
 		FROM users
 		WHERE id = $1
 		`
@@ -98,7 +100,7 @@ func (u UserModel) GetById(id int) (*User, error) {
 
 	row := u.DB.QueryRowContext(ctx, query, id)
 	err := row.Scan(&user.Id, &user.CreatedAt, &user.UpdatedAt, &user.ProfilePhoto,
-		&user.Name, &user.Username, &user.Description, &user.Email, &user.Password)
+		&user.Name, &user.Username, &user.Description, &user.Email, &user.Password, &user.Age)
 
 	if err != nil {
 		return nil, err
@@ -110,12 +112,12 @@ func (u UserModel) GetById(id int) (*User, error) {
 func (u UserModel) Update(user *User) error {
 	query := `
 		UPDATE users
-		SET profilePhoto = $1, name = $2, username = $3, description = $4, email = $5, password = $6
-		WHERE id = $7
+		SET profilePhoto = $1, name = $2, username = $3, description = $4, email = $5, password = $6, age = $7
+		WHERE id = $8
 		RETURNING updatedAt
 		`
 
-	args := []interface{}{user.ProfilePhoto, user.Name, user.Username, user.Description, user.Email, user.Password, user.Id}
+	args := []interface{}{user.ProfilePhoto, user.Name, user.Username, user.Description, user.Email, user.Password, user.Age, user.Id}
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 

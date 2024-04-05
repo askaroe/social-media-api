@@ -1,0 +1,2 @@
+ALTER TABLE users
+ADD COLUMN age integer DEFAULT 18;
