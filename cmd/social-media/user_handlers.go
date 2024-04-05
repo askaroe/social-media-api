@@ -74,13 +74,13 @@ func (app *application) getAllUsersHandler(w http.ResponseWriter, r *http.Reques
 		app.failedValidationResponse(w, r, v.Errors)
 		return
 	}
-	users, err := app.models.Users.GetAll(input.Username, input.Age, input.Filters)
+	users, metadata, err := app.models.Users.GetAll(input.Username, input.Age, input.Filters)
 
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
 	}
 
-	err = app.writeJSON(w, http.StatusOK, envelope{"users": users}, nil)
+	err = app.writeJSON(w, http.StatusOK, envelope{"users": users, "metadata": metadata}, nil)
 
 	if err != nil {
 		app.serverErrorResponse(w, r, err)

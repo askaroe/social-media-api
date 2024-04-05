@@ -40,12 +40,12 @@ func (u UserModel) Insert(user *User) error {
 	return u.DB.QueryRowContext(ctx, query, args...).Scan(&user.Id, &user.CreatedAt, &user.UpdatedAt)
 }
 
-func (u UserModel) GetAll(username string, age string, filters Filters) ([]*User, error) {
+func (u UserModel) GetAll(username string, age string, filters Filters) ([]*User, Metadata, error) {
 	if age == "" {
 		age = "0"
 	}
 	query := fmt.Sprintf(`
-		SELECT id, createdAt, updatedAt, profilePhoto, name, username, description, email, password, age
+		SELECT count(*) OVER(), id, createdAt, updatedAt, profilePhoto, name, username, description, email, password, age
 		FROM users
 		WHERE (LOWER(username) = LOWER($1) OR $1 = '')
 		AND (age >= $2 OR $2 = 0)
@@ -60,17 +60,19 @@ func (u UserModel) GetAll(username string, age string, filters Filters) ([]*User
 
 	rows, err := u.DB.QueryContext(ctx, query, args...)
 	if err != nil {
-		return nil, err
+		return nil, Metadata{}, err
 	}
 
 	defer rows.Close()
 
+	totalRecords := 0
 	users := []*User{}
 
 	for rows.Next() {
 		var user User
 
 		err := rows.Scan(
+			&totalRecords,
 			&user.Id,
 			&user.CreatedAt,
 			&user.UpdatedAt,
@@ -84,17 +86,19 @@ func (u UserModel) GetAll(username string, age string, filters Filters) ([]*User
 		)
 
 		if err != nil {
-			return nil, err
+			return nil, Metadata{}, err
 		}
 
 		users = append(users, &user)
 	}
 
 	if err := rows.Err(); err != nil {
-		return nil, err
+		return nil, Metadata{}, err
 	}
 
-	return users, nil // Return users and nil error
+	metadata := calculateMetadata(totalRecords, filters.Page, filters.PageSize)
+
+	return users, metadata, nil // Return users and nil error
 }
 
 func (u UserModel) GetById(id int) (*User, error) {
