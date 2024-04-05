@@ -3,6 +3,7 @@ package model
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"log"
 	"time"
 )
@@ -40,13 +41,16 @@ func (u UserModel) Insert(user *User) error {
 }
 
 func (u UserModel) GetAll(username string, age string, filters Filters) ([]*User, error) {
-	query := `
+	if age == "" {
+		age = "0"
+	}
+	query := fmt.Sprintf(`
 		SELECT id, createdAt, updatedAt, profilePhoto, name, username, description, email, password, age
 		FROM users
 		WHERE (LOWER(username) = LOWER($1) OR $1 = '')
 		AND (age >= $2 OR $2 = 0)
-		ORDER BY id
-	`
+		ORDER BY %s %s, id ASC
+	`, filters.sortColumn(), filters.sortDirection())
 
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
