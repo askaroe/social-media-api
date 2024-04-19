@@ -8,11 +8,12 @@ import (
 )
 
 type Models struct {
-	Users    UserModel
-	Posts    PostModel
-	Comments CommentModel
-	Tokens   TokenModel
-	Members  MemberModel
+	Users       UserModel
+	Posts       PostModel
+	Comments    CommentModel
+	Permissions PermissionModel
+	Tokens      TokenModel
+	Members     MemberModel
 }
 
 var (
@@ -41,6 +42,9 @@ func NewModels(db *sql.DB) Models {
 			DB:       db,
 			InfoLog:  infoLog,
 			ErrorLog: errorLog,
+		},
+		Permissions: PermissionModel{
+			DB: db,
 		},
 		Tokens: TokenModel{
 			DB: db,
