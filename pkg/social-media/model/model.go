@@ -2,6 +2,7 @@ package model
 
 import (
 	"database/sql"
+	"errors"
 	"log"
 	"os"
 )
@@ -10,7 +11,16 @@ type Models struct {
 	Users    UserModel
 	Posts    PostModel
 	Comments CommentModel
+	Members  MemberModel
 }
+
+var (
+	// ErrRecordNotFound is returned when a record doesn't exist in database.
+	ErrRecordNotFound = errors.New("record not found")
+
+	// ErrEditConflict is returned when a there is a data race, and we have an edit conflict.
+	ErrEditConflict = errors.New("edit conflict")
+)
 
 func NewModels(db *sql.DB) Models {
 	infoLog := log.New(os.Stdout, "INFO\t", log.Ldate|log.Ltime)
@@ -30,6 +40,9 @@ func NewModels(db *sql.DB) Models {
 			DB:       db,
 			InfoLog:  infoLog,
 			ErrorLog: errorLog,
+		},
+		Members: MemberModel{
+			DB: db,
 		},
 	}
 }
