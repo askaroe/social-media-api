@@ -80,6 +80,7 @@ func (app *application) run() {
 	// Members
 	v1.HandleFunc("/members", app.registerMemberHandler).Methods("POST")
 	v1.HandleFunc("/members/activated", app.activateMemberHandler).Methods("PUT")
+	v1.HandleFunc("/tokens/authentication", app.createAuthenticationTokenHandler).Methods("POST")
 
 	log.Printf("Starting server on %s\n", app.config.port)
 	err := http.ListenAndServe(app.config.port, r)
