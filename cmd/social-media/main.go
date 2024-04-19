@@ -4,14 +4,17 @@ import (
 	"database/sql"
 	"flag"
 	"fmt"
-	"log"
-	"net/http"
+	"os"
 
 	"github.com/askaroe/social-media-api/pkg/jsonlog"
 	"github.com/askaroe/social-media-api/pkg/social-media/model"
-	"github.com/gorilla/mux"
+	"github.com/askaroe/social-media-api/pkg/vcs"
 
 	_ "github.com/lib/pq"
+)
+
+var (
+	version = vcs.Version()
 )
 
 type config struct {
@@ -36,59 +39,39 @@ func main() {
 	flag.StringVar(&cfg.db.dsn, "db-dsn", "postgres://postgres:admin@localhost/social_media?sslmode=disable", "PostgreSQL DSN")
 	flag.Parse()
 
+	// Init logger
+	logger := jsonlog.NewLogger(os.Stdout, jsonlog.LevelInfo)
+
 	// Connect to DB
 	db, err := openDB(cfg)
 	if err != nil {
-		log.Fatal(err)
+		logger.PrintError(err, nil)
 		return
 	}
-	defer db.Close()
+	defer func() {
+		if err := db.Close(); err != nil {
+			logger.PrintFatal(err, nil)
+		}
+	}()
 
 	app := &application{
 		config: cfg,
 		models: model.NewModels(db),
+		logger: logger,
 	}
 
-	app.run()
-}
+	if err := app.serve(); err != nil {
+		logger.PrintFatal(err, nil)
+	}
 
-func (app *application) run() {
-	fmt.Println("Running")
-	r := mux.NewRouter()
-
-	v1 := r.PathPrefix("/api/v1").Subrouter()
-
-	// Users
-	v1.HandleFunc("/register", app.createUserHandler).Methods("POST")
-	v1.HandleFunc("/users", app.getAllUsersHandler).Methods("GET")
-	v1.HandleFunc("/users/{userId:[0-9]+}", app.getUserByIdHandler).Methods("GET")
-	v1.HandleFunc("/users/{userId:[0-9]+}", app.updateUserHandler).Methods("PUT")
-	v1.HandleFunc("/users/{userId:[0-9]+}", app.deleteUserHandler).Methods("DELETE")
-
-	// Posts
-	v1.HandleFunc("/posts", app.createPostHandler).Methods("POST")
-	v1.HandleFunc("/posts/{postId:[0-9]+}", app.getPostHandler).Methods("GET")
-	v1.HandleFunc("/posts/{postId:[0-9]+}", app.updatePostHandler).Methods("PUT")
-	v1.HandleFunc("/posts/{postId:[0-9]+}", app.deletePostHandler).Methods("DELETE")
-
-	// Comments
-	v1.HandleFunc("/comments", app.createCommentHandler).Methods("POST")
-	v1.HandleFunc("/comments/{commentId:[0-9]+}", app.getCommentHandler).Methods("GET")
-	v1.HandleFunc("/comments/{commentId:[0-9]+}", app.updateCommentHandler).Methods("PUT")
-	v1.HandleFunc("/comments/{commentId:[0-9]+}", app.deleteCommentHandler).Methods("DELETE")
-
-	// Members
-	v1.HandleFunc("/members", app.registerMemberHandler).Methods("POST")
-	v1.HandleFunc("/members/activated", app.activateMemberHandler).Methods("PUT")
-	v1.HandleFunc("/tokens/authentication", app.createAuthenticationTokenHandler).Methods("POST")
-
-	log.Printf("Starting server on %s\n", app.config.port)
-	err := http.ListenAndServe(app.config.port, r)
-	log.Fatal(err)
 }
 
 func openDB(cfg config) (*sql.DB, error) {
 	db, err := sql.Open("postgres", cfg.db.dsn)
+	if err != nil {
+		return nil, err
+	}
+	err = db.Ping()
 	if err != nil {
 		return nil, err
 	}
