@@ -30,10 +30,10 @@ func (app *application) routes() http.Handler {
 	v1.HandleFunc("/users/{userId:[0-9]+}", app.deleteUserHandler).Methods("DELETE")
 
 	// Posts
-	v1.HandleFunc("/posts", app.requireActivatedMember(app.createPostHandler)).Methods("POST")
-	v1.HandleFunc("/posts/{postId:[0-9]+}", app.requireActivatedMember(app.getPostHandler)).Methods("GET")
-	v1.HandleFunc("/posts/{postId:[0-9]+}", app.requireActivatedMember(app.updatePostHandler)).Methods("PUT")
-	v1.HandleFunc("/posts/{postId:[0-9]+}", app.requireActivatedMember(app.deletePostHandler)).Methods("DELETE")
+	v1.HandleFunc("/posts", app.requirePermission("posts:write", app.createPostHandler)).Methods("POST")
+	v1.HandleFunc("/posts/{postId:[0-9]+}", app.requirePermission("posts:read", app.getPostHandler)).Methods("GET")
+	v1.HandleFunc("/posts/{postId:[0-9]+}", app.requirePermission("posts:write", app.updatePostHandler)).Methods("PUT")
+	v1.HandleFunc("/posts/{postId:[0-9]+}", app.requirePermission("posts:write", app.deletePostHandler)).Methods("DELETE")
 
 	// Comments
 	v1.HandleFunc("/comments", app.createCommentHandler).Methods("POST")

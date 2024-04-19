@@ -46,9 +46,8 @@ func (app *application) authenticate(next http.Handler) http.Handler {
 
 func (app *application) requireActivatedMember(next http.HandlerFunc) http.HandlerFunc {
 	fn := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		user := app.contextGetMember(r)
-		// Check that a user is activated.
-		if !user.Activated {
+		member := app.contextGetMember(r)
+		if !member.Activated {
 			app.inactiveAccountResponse(w, r)
 			return
 		}
@@ -59,11 +58,28 @@ func (app *application) requireActivatedMember(next http.HandlerFunc) http.Handl
 
 func (app *application) requireAuthenticatedMember(next http.HandlerFunc) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		user := app.contextGetMember(r)
-		if user.IsAnonymous() {
+		member := app.contextGetMember(r)
+		if member.IsAnonymous() {
 			app.authenticationRequiredResponse(w, r)
 			return
 		}
 		next.ServeHTTP(w, r)
 	})
+}
+
+func (app *application) requirePermission(code string, next http.HandlerFunc) http.HandlerFunc {
+	fn := func(w http.ResponseWriter, r *http.Request) {
+		member := app.contextGetMember(r)
+		permissions, err := app.models.Permissions.GetAllForMember(member.ID)
+		if err != nil {
+			app.serverErrorResponse(w, r, err)
+			return
+		}
+		if !permissions.Include(code) {
+			app.notPermittedResponse(w, r)
+			return
+		}
+		next.ServeHTTP(w, r)
+	}
+	return app.requireActivatedMember(fn)
 }
