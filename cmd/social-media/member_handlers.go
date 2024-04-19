@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/askaroe/social-media-api/pkg/social-media/model"
 	"github.com/askaroe/social-media-api/pkg/social-media/validator"
@@ -56,8 +57,19 @@ func (app *application) registerMemberHandler(w http.ResponseWriter, r *http.Req
 		return
 	}
 
-	err = app.writeJSON(w, http.StatusCreated, envelope{"member": member}, nil)
+	token, err := app.models.Tokens.New(member.ID, 3*24*time.Hour, model.ScopeActivation)
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
+		return
 	}
+
+	var res struct {
+		Token  *string       `json:"token"`
+		Member *model.Member `json:"member"`
+	}
+
+	res.Token = &token.Plaintext
+	res.Member = member
+
+	app.writeJSON(w, http.StatusCreated, envelope{"member": res}, nil)
 }
