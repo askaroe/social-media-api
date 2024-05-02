@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"net/http"
 	"strconv"
 
@@ -47,6 +48,7 @@ func (app *application) createUserHandler(w http.ResponseWriter, r *http.Request
 }
 
 func (app *application) getAllUsersHandler(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("--> Hitted")
 	var input struct {
 		Username string
 		Age      string
