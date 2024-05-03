@@ -2,6 +2,7 @@ package filler
 
 import (
 	model "github.com/askaroe/social-media-api/pkg/social-media/model"
+	_ "github.com/lib/pq"
 )
 
 func PopulateDatabase(models model.Models) error {
